@@ -4,51 +4,68 @@ import java.io.*;
 import java.lang.reflect.Array;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class VegetationData {
-    private int[][] dataArray; // 2D array to store the tree density values
-    private Map<Double, Map<Double, Integer>> dataMap;
-    private double lonMin, latMin, lonMax, latMax; // min and max longitude and latitude values in the data
-    int resolution; // resolution of the 2D array
+    private int[][] dataArray;
+    private NavigableMap<Double, Map<Double, Integer>> dataMap;
 
-    public VegetationData(String filename, int resolution) throws IOException{
-        // Read the data from the file and store it as a list of arrays
-        List<String> lines = Files.readAllLines(Paths.get(filename));
-        List<double[]> data = lines.stream()
-                .map(line -> line.split(" "))
-                .map(values -> new double[] {
-                        Double.parseDouble(values[0]),
-                        Double.parseDouble(values[1]),
-                        Double.parseDouble(values[2])
-                })
-                .collect(Collectors.toList());
+    public VegetationData(String filename) {
+        readData(filename);
+    }
 
-        // Calculate the minimum and maximum values for longitude and latitude
-        double lonMin = data.stream().mapToDouble(values -> values[0]).min().getAsDouble();
-        double latMin = data.stream().mapToDouble(values -> values[1]).min().getAsDouble();
-        double lonMax = data.stream().mapToDouble(values -> values[0]).max().getAsDouble();
-        double latMax = data.stream().mapToDouble(values -> values[1]).max().getAsDouble();
+    private void readData(String filename) {
+        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+            String line;
+            double lat, lon;
+            int density;
+            double latIndex, lonIndex;
+            double latMin = -90.0;
+            double latMax = 90.0;
+            double lonMin = -180.0;
+            double lonMax = 180.0;
+            double latRange = latMax - latMin;
+            double lonRange = lonMax - lonMin;
+            int resolutionX = 2000;
+            int resolutionY = 1000;
+            dataArray = new int[resolutionY][resolutionX];
 
-        // Set the resolution and initialize the dataArray
-        this.resolution = resolution;
-        this.dataArray = new int[resolution][resolution/2];
+            while ((line = br.readLine()) != null) {
+                String[] parts = line.split(",");
+                lon = Double.parseDouble(parts[0]);
+                lat = Double.parseDouble(parts[1]);
+                density = Integer.parseInt(parts[2]);
+                latIndex = (lat - latMin) / latRange * (resolutionY - 1);
+                lonIndex = (lon - lonMin) / lonRange * (resolutionX - 1);
+                dataArray[(int)latIndex][(int)lonIndex] = density;
 
-        // Loop through the data and add each point to the dataArray
-        for (double[] values : data) {
-            int x = (int) ((values[0] - lonMin) / (lonMax - lonMin) * resolution);
-            int y = (int) ((values[1] - latMin) / (latMax - latMin) * resolution / 2);
-            int density = (int) values[2];
-            this.dataArray[x][y] = density;
-
+                if (!dataMap.containsKey(lon)) {
+                    dataMap.put(lon, new HashMap<>());
+                }
+                dataMap.get(lon).put(lat, density);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
-    public int getFromArray(int x, int y){
-        return this.dataArray[x][y];
+    public int getFromArray(int x, int y) {
+        return dataArray[y][x];
     }
 
+    public int getFromMap(double lon, double lat) {
+        Map.Entry<Double, Map<Double, Integer>> lonEntry = dataMap.floorEntry(lon);
+        if (lonEntry == null) {
+            return 0;
+        }
+        NavigableMap<Double, Integer> latMap = (NavigableMap<Double, Integer>) lonEntry.getValue();
+        Map.Entry<Double, Integer> latEntry = latMap.floorEntry(lat);
+        if (latEntry == null) {
+            return 0;
+        }
+        return latEntry.getValue();
+    }
 }
+
+

@@ -1,0 +1,134 @@
+public class VegetationData {
+    private int[][] dataArray; // 2D array to store the tree density values
+    private Map<Double, Map<Double, Integer>> dataMap;
+    private double lonMin, latMin, lonMax, latMax; // min and max longitude and latitude values in the data
+    int resolution; // resolution of the 2D array
+
+    public VegetationData(String filename, int resolution) throws IOException{
+//        // Read the data from the file and store it as a list of arrays
+//        List<String> lines = Files.readAllLines(Paths.get(filename));
+//        List<double[]> data = lines.stream()
+//                .map(line -> line.split(" "))
+//                .map(values -> new double[] {
+//                        Double.parseDouble(values[0]),
+//                        Double.parseDouble(values[1]),
+//                        Double.parseDouble(values[2])
+//                })
+//                .collect(Collectors.toList());
+//
+//        // Calculate the minimum and maximum values for longitude and latitude
+//        double lonMin = data.stream().mapToDouble(values -> values[0]).min().getAsDouble();
+//        double latMin = data.stream().mapToDouble(values -> values[1]).min().getAsDouble();
+//        double lonMax = data.stream().mapToDouble(values -> values[0]).max().getAsDouble();
+//        double latMax = data.stream().mapToDouble(values -> values[1]).max().getAsDouble();
+//
+//        // Set the resolution and initialize the dataArray
+//        this.resolution = resolution;
+//        this.dataArray = new int[resolution][resolution/2];
+//
+//        // Loop through the data and add each point to the dataArray
+//        for (double[] values : data) {
+//            int x = (int) ((values[0] - lonMin) / (lonMax - lonMin) * resolution);
+//            int y = (int) ((values[1] - latMin) / (latMax - latMin) * resolution / 2);
+//            int density = (int) values[2];
+//            this.dataArray[x][y] = density;
+//
+//        }
+
+//        // Read data from CSV file
+//        try (BufferedReader br = new BufferedReader(new FileReader(filename))) {
+//            String line;
+//            // Loop through each line of the file
+//            while ((line = br.readLine()) != null) {
+//                // Split the line into longitude, latitude, and vegetation data
+//                String[] parts = line.split(",");
+//                double lon = Double.parseDouble(parts[0]);
+//                double lat = Double.parseDouble(parts[1]);
+//                int vegData = Integer.parseInt(parts[2]);
+//
+//                // TODO: Store the data in the dataArray and dataMap
+//            }
+//        } catch (IOException e) {
+//            System.err.println("Error reading file: " + e.getMessage());
+//        }
+
+        List<String> lines = Files.readAllLines(Paths.get(filename));
+        this.dataMap = new HashMap<>();
+        double maxDensity = 0;
+
+        for (String line : lines) {
+            String[] values = line.split(" ");
+            double lon = Double.parseDouble(values[0]);
+            double lat = Double.parseDouble(values[1]);
+            int density = Integer.parseInt(values[2]);
+
+            // update the min and max values of longitude and latitude
+            if (lon < lonMin || dataMap.isEmpty()) {
+                lonMin = lon;
+            }
+            if (lat < latMin || dataMap.isEmpty()) {
+                latMin = lat;
+            }
+            if (lon > lonMax || dataMap.isEmpty()) {
+                lonMax = lon;
+            }
+            if (lat > latMax || dataMap.isEmpty()) {
+                latMax = lat;
+            }
+
+            // store the data in the Map
+            if (!dataMap.containsKey(lon)) {
+                dataMap.put(lon, new HashMap<>());
+            }
+            dataMap.get(lon).put(lat, density);
+
+            // update the max density
+            if (density > maxDensity) {
+                maxDensity = density;
+            }
+        }
+
+        // normalize the densities to a scale of 0-100
+        for (Map.Entry<Double, Map<Double, Integer>> entry : dataMap.entrySet()) {
+            for (Map.Entry<Double, Integer> innerEntry : entry.getValue().entrySet()) {
+                double density = (double) innerEntry.getValue() / maxDensity * 100;
+                entry.getValue().put(innerEntry.getKey(), (int) density);
+            }
+        }
+
+    }
+
+    public int getFromArray(int x, int y){
+        return this.dataArray[x][y];
+    }
+
+    public int getFromMap(double lon, double lat) {
+        double closestDist = Double.MAX_VALUE;
+        int closestDensity = 0;
+
+        for (Map.Entry<Double, Map<Double, Integer>> entry : dataMap.entrySet()) {
+            double dist = Math.sqrt(Math.pow(entry.getKey() - lon, 2) + Math.pow(getClosestLat(entry.getValue(), lat) - lat, 2));
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestDensity = entry.getValue().get(getClosestLat(entry.getValue(), lat));
+            }
+        }
+
+        return closestDensity;
+    }
+
+    private double getClosestLat(Map<Double, Integer> map, double lat) {
+        double closestLat = Double.MAX_VALUE;
+        double closestDist = Double.MAX_VALUE;
+
+        for (Map.Entry<Double, Integer> entry : map.entrySet()) {
+            double dist = Math.abs(entry.getKey() - lat);
+            if (dist < closestDist) {
+                closestDist = dist;
+                closestLat = entry.getKey();
+            }
+        }
+
+        return closestLat;
+    }
+}
