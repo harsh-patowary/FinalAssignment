@@ -32,29 +32,19 @@ public class Forest {
         for (Tree tree : trees)
             if (tree.getHeight() > maxHeight) maxHeight = tree.getHeight();
 
-            StringBuilder forest = new StringBuilder();
-            for (int i = maxHeight; i > 0; i--){
-                for (Tree tree: trees){
-                    /**
-                     * When printing ending of empty tree the segments shift a lil
-                     * figure that out
-                     * updt: used * to mark white spaces
-                     * make a padding variable and calc the padding
-                     * also check for empty trees so that the length does not get mismatched
-                     */
-                    String segments[] = tree.toString().split("\n");
-                    if (segments.length >= i) {
-                        forest.append(segments[segments.length-i]);
-                    }
-                    else if (segments.length != 0){
-                        forest.append("    ");
-                    }
-                    else {
-                        forest.append("  ");
-                    }
+        StringBuilder forest = new StringBuilder();
+        for (int i = maxHeight; i > 0; i--){
+            for (Tree tree: trees){
+                String segments[] = tree.toString().split("\n");
+                if (tree.getHeight() >= i) {
+                    forest.append(segments[segments.length-i]);
                 }
-                forest.append("\n");
+                else if ((tree.getHeight() > 0)&&(tree.getHeight()<=i)){
+                    forest.append("     ");
+                }
             }
+            forest.append("\n");
+        }
         return forest.toString();
     }
 

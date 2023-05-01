@@ -1,17 +1,14 @@
 package ExerciseThree;
 
 import java.io.*;
-import java.lang.reflect.Array;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Collectors;
 
 public class VegetationData {
+    public int resolution;
     private int[][] dataArray;
     private NavigableMap<Double, Map<Double, Integer>> dataMap;
 
-    public VegetationData(String filename) {
+    public VegetationData(String filename, int i) {
         readData(filename);
     }
 
@@ -65,6 +62,14 @@ public class VegetationData {
             return 0;
         }
         return latEntry.getValue();
+    }
+
+    public int getResolution() {
+        return 0;
+    }
+
+    public Map<Object, Object> getFromMap() {
+        return null;
     }
 }
 

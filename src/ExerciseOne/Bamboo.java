@@ -11,7 +11,7 @@ public class Bamboo extends Tree{
 
     @Override
     String getSegment(int seg) {
-        if (seg == getHeight()) return " ^ ";
-        else return " | ";
+        if (seg == getHeight()) return "  ^  ";
+        else return "  |  ";
     }
 }

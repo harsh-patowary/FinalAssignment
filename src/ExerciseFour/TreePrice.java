@@ -1,11 +1,10 @@
 package ExerciseFour;
 
-public class TreePrice implements Comparable<TreePrice> {
-    private double realPrice;
-    private double nominalPrice;
-    private PriceData priceDate;
+public class TreePrice implements Comparable<TreePrice>{
+    private double realPrice, nominalPrice;
+    private PriceDate priceDate;
 
-    public TreePrice(double realPrice, double nominalPrice, PriceData priceDate) {
+    public TreePrice(PriceDate priceDate,  double nominalPrice, double realPrice) {
         this.realPrice = realPrice;
         this.nominalPrice = nominalPrice;
         this.priceDate = priceDate;
@@ -19,19 +18,17 @@ public class TreePrice implements Comparable<TreePrice> {
         return nominalPrice;
     }
 
-    public PriceData getPriceDate() {
+    public PriceDate getPriceDate() {
         return priceDate;
     }
 
     @Override
     public int compareTo(TreePrice other) {
-//        return this.priceDate.compareTo(other.getPriceDate());
-        return this.priceDate.compareTo(other.getPriceDate());
+        return this.priceDate.compareTo(other.priceDate);
     }
 
     @Override
-    public String toString() {
-        return priceDate.toString() + " Nominal: " + nominalPrice + " Real: " + realPrice;
+    public String toString(){
+        return priceDate.toString()+" Nominal: "+this.nominalPrice+" Real Price: "+ this.realPrice;
     }
 }
-

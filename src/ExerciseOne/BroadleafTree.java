@@ -8,7 +8,7 @@ public class BroadleafTree extends Tree{
     @Override
     String getSegment(int seg) {
         if (seg == getHeight()) return "  |  ";
-        else if(seg%2==0) return "\\|  ";
+        else if(seg%2==0) return " \\|  ";
         else return "  |/ ";
     }
 }

@@ -35,7 +35,7 @@ public class PlotVegetation extends JComponent {
 
         if (useMap) {
             for (double lon = -180; lon < 180; lon += 0.1) {
-                Map<Double, Integer> latMap = vd.getFromMap().get(lon);
+                Map<Double, Integer> latMap = (Map<Double, Integer>) vd.getFromMap().get(lon);
                 if (latMap != null) {
                     for (double lat = -90; lat < 90; lat += 0.1) {
                         Integer vegetation = latMap.get(lat);
