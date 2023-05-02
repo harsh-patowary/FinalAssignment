@@ -4,11 +4,13 @@ import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.NavigableMap;
 
 import javax.swing.JComponent;
 
-public class PlotVegetation extends JComponent {
+public class PlotVegetation extends Plot {
 
     private VegetationData vd;
     private boolean useColour;
@@ -25,7 +27,6 @@ public class PlotVegetation extends JComponent {
         super.paintComponent(g);
         Graphics2D g2d = (Graphics2D) g;
 
-        // Set anti-aliasing for smooth rendering
         g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
         int width = getWidth();
@@ -34,8 +35,9 @@ public class PlotVegetation extends JComponent {
         int[][] dataArray = new int[width][height];
 
         if (useMap) {
+            System.out.println("Using Map");
             for (double lon = -180; lon < 180; lon += 0.1) {
-                Map<Double, Integer> latMap = (Map<Double, Integer>) vd.getFromMap().get(lon);
+                Map<Double, Integer> latMap =  vd.getFromMap(lon);
                 if (latMap != null) {
                     for (double lat = -90; lat < 90; lat += 0.1) {
                         Integer vegetation = latMap.get(lat);

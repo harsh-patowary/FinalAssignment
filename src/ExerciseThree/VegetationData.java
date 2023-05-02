@@ -4,7 +4,7 @@ import java.io.*;
 import java.util.*;
 
 public class VegetationData {
-    public int resolution;
+    private int resolution;
     private int[][] dataArray;
     private NavigableMap<Double, Map<Double, Integer>> dataMap;
 
@@ -25,11 +25,13 @@ public class VegetationData {
             double latRange = latMax - latMin;
             double lonRange = lonMax - lonMin;
             int resolutionX = 2000;
+            this.resolution = resolutionX;
             int resolutionY = 1000;
             dataArray = new int[resolutionY][resolutionX];
+            dataMap = new TreeMap<>();
 
             while ((line = br.readLine()) != null) {
-                String[] parts = line.split(",");
+                String[] parts = line.split(" ");
                 lon = Double.parseDouble(parts[0]);
                 lat = Double.parseDouble(parts[1]);
                 density = Integer.parseInt(parts[2]);
@@ -38,7 +40,9 @@ public class VegetationData {
                 dataArray[(int)latIndex][(int)lonIndex] = density;
 
                 if (!dataMap.containsKey(lon)) {
-                    dataMap.put(lon, new HashMap<>());
+                    Map<Double, Integer> hm= new HashMap<>();
+                    hm.put(lat, density);
+                    dataMap.put(lon, hm);
                 }
                 dataMap.get(lon).put(lat, density);
             }
@@ -51,26 +55,23 @@ public class VegetationData {
         return dataArray[y][x];
     }
 
-    public int getFromMap(double lon, double lat) {
-        Map.Entry<Double, Map<Double, Integer>> lonEntry = dataMap.floorEntry(lon);
-        if (lonEntry == null) {
-            return 0;
-        }
-        NavigableMap<Double, Integer> latMap = (NavigableMap<Double, Integer>) lonEntry.getValue();
-        Map.Entry<Double, Integer> latEntry = latMap.floorEntry(lat);
-        if (latEntry == null) {
-            return 0;
-        }
-        return latEntry.getValue();
+    public Map<Double, Integer> getFromMap(double lon) {
+//        Map.Entry<Double, Map<Double, Integer>> lonEntry = dataMap.floorEntry(lon);
+////        if (lonEntry == null) {
+////            return null;
+////        }
+//        NavigableMap<Double, Integer> latMap = (NavigableMap<Double, Integer>) lonEntry.getValue();
+//        Map.Entry<Double, Integer> latEntry = latMap.floorEntry(lon);
+        Map<Double, Integer> hm = this.dataMap.get(lon);
+
+        return hm;
     }
 
     public int getResolution() {
-        return 0;
+        return this.resolution;
     }
 
-    public Map<Object, Object> getFromMap() {
-        return null;
-    }
+
 }
 
 
